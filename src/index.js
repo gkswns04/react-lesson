@@ -1,15 +1,43 @@
-import React from 'react';
+import { observable } from 'mobx';
+import { observer } from 'mobx-react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
+import DevTools from 'mobx-react-devtools';
 
-import App from './components/app';
-import reducers from './reducers';
+const appState = observable({
+  count : 0
+})
+appState.increment = function() {
+  this.count++;
+}
+appState.decrement = function() {
+  this.count--;
+}
 
-const createStoreWithMiddleware = applyMiddleware()(createStore);
+@observer class Counter extends Component {
+  @observable count = 0;
+
+  render() {
+    return (
+      <div>
+        <DevTools />
+        Counter: {this.props.store.count} <br/>
+        <button onClick={this.handleInc}> + </button>
+        <button onClick={this.handleDec}> - </button>
+      </div>
+    )
+  }
+
+  handleInc = () => {
+    appState.increment()
+  }
+
+  handleDec = () => {
+    appState.decrement()
+  }
+}
 
 ReactDOM.render(
-  <Provider store={createStoreWithMiddleware(reducers)}>
-    <App />
-  </Provider>
-  , document.querySelector('.container'));
+  <Counter store={appState} />,
+  document.querySelector('.container')
+)
